@@ -21,7 +21,7 @@
 (deftest symbols-env-test
   (testing "symbols eval to their value in the environment"
     (is (= 10 (my-eval {'x 10} 'x)))
-    (is (= "yo" (my-eval {'x "yo!"} 'x)))
+    (is (= "yo!" (my-eval {'x "yo!"} 'x)))
     (is (= nil (my-eval {'x nil} 'x)))))
 
 (deftest functions-self-test 
