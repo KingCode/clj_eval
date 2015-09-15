@@ -3,7 +3,7 @@
 
 (defn my-eval [env exp]
     (letfn [(eval-list [env [_ & args :as exp]]
-            (let [ [op vargs] (->> (map #(my-eval env %) exp) 
+            (let [ [op vargs :as e-exp] (->> (map #(my-eval env %) exp) 
                                        ((fn [v] [(first v), (vec (rest v))]))) 
                    _ (log "EVAL-LIST-exp-op-vargs:" exp op vargs)]
                 (condp = op
@@ -18,7 +18,7 @@
                                      (apply list 'do body)))
 
                     (if (fn? op) (apply op vargs)
-                         exp))))
+                         (cons op vargs)))))
 
             (let-resolve [env lbexps]
                     (let [ _ (log "LETRESOLVE-bindings" lbexps)

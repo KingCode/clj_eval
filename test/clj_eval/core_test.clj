@@ -71,7 +71,7 @@
 
 
 (deftest recursive-test
-  (testing "ensure we're calling my-eval recusively"
+  (testing "ensure we're calling my-eval recursively"
     (is (= 3 (my-eval {'+ +} '(do (+ 1 2)))))
     (is (= 13 (my-eval {'+ +} '(+ (+ 1 10) 2))))))
 
@@ -80,5 +80,25 @@
   (testing "do expressions evaluate all forms"
     (is (= 85 (my-eval {'deref deref 'reset! reset! 'a (atom nil) '+ +} 
                            '(do (reset! a 10) (+ (deref a) 75)))))))
+;;Added tests
+
+(deftest nested-let-newvar-test
+   (testing "nested let without shadowing renders the correct value"
+     (is (= '(* 1 (+ 5 3)) (my-eval {'x 1 'y 2} 
+                                   '(* x (+ (let [z 5] z) 3)))))))
+
+(deftest nested-let-shadow-test
+   (testing "nested let wit shadowing renders the correct value"
+     (is (= '(* 1 (+ 5 3)) (my-eval {'x 1 'y 2} 
+                                   '(* x (+ (let [y 5] y) 3)))))))
 
 
+(deftest nested-let-noshadow-nested-func-test   
+   (testing "resolved nested funcs with nested let without shadowing give correct value"
+     (is (= 16 (my-eval {'x 1 'y 2 '+ + '* *} 
+                                   '(* x y (+ (let [z 5] z) 3)))))))
+
+(deftest nested-let-shadowing-nested-func-test   
+   (testing "resolved nested funcs with nested let without shadowing give correct value"
+     (is (= 24 (my-eval {'x 1 'y 2 '+ + '* *} 
+                                   '(* x (let [y 3] y) (+ (let [y 5] y) 3)))))))
