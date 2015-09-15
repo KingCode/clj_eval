@@ -90,15 +90,29 @@
 (deftest nested-let-shadow-test
    (testing "nested let wit shadowing renders the correct value"
      (is (= '(* 1 (+ 5 3)) (my-eval {'x 1 'y 2} 
-                                   '(* x (+ (let [y 5] y) 3)))))))
+                                   '(* x (+ (let [y 5] y) 3)))))
+
+     (is (= '(* 1 (- (inc 3) 10) (+ 5 3) 
+             (my-eval {'x 1 'y 2} 
+                  '(* x (let [y 3 z 10] (- (inc y) z)) (+ (let [y 5] y) 3))))))))
 
 
 (deftest nested-let-noshadow-nested-func-test   
    (testing "resolved nested funcs with nested let without shadowing give correct value"
      (is (= 16 (my-eval {'x 1 'y 2 '+ + '* *} 
-                                   '(* x y (+ (let [z 5] z) 3)))))))
+                                   '(* x y (+ (let [z 5] z) 3)))))
+     (is (= 18 (my-eval {'x 1 'y 2 '+ + '* * 'inc inc} 
+                                   '(* x y (+ (let [z 5] (inc z)) 3)))))))
 
 (deftest nested-let-shadowing-nested-func-test   
    (testing "resolved nested funcs with nested let without shadowing give correct value"
      (is (= 24 (my-eval {'x 1 'y 2 '+ + '* *} 
-                                   '(* x (let [y 3] y) (+ (let [y 5] y) 3)))))))
+                                   '(* x (let [y 3] y) (+ (let [y 5] y) 3)))))
+      (is (= 28 (my-eval {'x 1 'y 2 '+ + '* * 'inc inc 'dec dec} 
+                                   '(* x (let [y 3] (inc y)) 
+                                       (+ (let [y 5] (dec y)) 3)))))))
+
+(deftest nested-if-let--test
+  (testing "nested ifs and let with yield correct value"
+    (is (= 1 (my-eval {'x 1} '(let [y 2 z (if (zero? x) 1 0)] z))))
+    (is (= 0 (my-eval {'x 1 'zero? zero?} '(let [y 2 z (if (zero? x) 1 0)] z) ))))) 
