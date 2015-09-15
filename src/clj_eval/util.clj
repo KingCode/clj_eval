@@ -1,6 +1,6 @@
 (ns clj-eval.util)
 
-(def debug false)
+(def debug nil)
 
 (defn log [& s]
   (when debug (apply println s)))
