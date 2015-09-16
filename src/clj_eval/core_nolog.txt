@@ -2,12 +2,10 @@
   (:require [clj-eval.util :refer [log] :as u]))
 
 (defn my-eval [env exp]
-  (do (log "***MY-EVAL_env,exp->" env exp)
     (letfn [(eval-list [env [op & args :as exp]]
                 (if (= 'let op)
                     (eval-let env exp)
-                    (let [ vargs (->> (map #(my-eval env %) args) vec) 
-                        _ (log "EVAL-LIST-exp-op-vargs:" exp op vargs)]
+                    (let [ vargs (vec (map #(my-eval env %) args))]
                         (condp = op
                             'if (if (vargs 0) (vargs 1) (vargs 2))
 
@@ -19,25 +17,18 @@
                                     (cons op vargs)))))))
 
             (eval-let [env [_ bindings & body]]
-              (do (log "EVAL-LET-binds-body:" bindings body)
               (->> (apply list 'do body)
                    (my-eval (apply assoc env 
-                                   (let-resolve env bindings))))))
+                                   (let-resolve env bindings)))))
               
             (let-resolve [env lbexps]
-                    (let [ _ (log "LETRESOLVE-bindings" lbexps)
-                           res
                             (->> (partition 2 lbexps) 
                                 (map (fn [[bk bexp]]
                                         [bk (my-eval env bexp)]))
                                 (apply concat) 
-                                vec) 
-                                _ (log "LETRESOLVE-res:" res)] res)) ]
+                                vec)) ] 
   (cond 
      (symbol? exp) (get env exp exp)
-     (seq? exp) (do (log "SEQ **** env exp" env exp) (eval-list env exp))
-     (coll? exp) (do (log "COLL **** env exp" env exp) (into (empty exp) (map #(my-eval env %) exp)))
-     :else exp))))
-
-;; (my-eval {'x 1 'y 2} '(* x (+ (let [y 5] y) 3)))
-
+     (seq? exp) (eval-list env exp)
+     (coll? exp) (into (empty exp) (map #(my-eval env %) exp))
+     :else exp)))
