@@ -36,6 +36,12 @@
   (cond 
      (symbol? exp) (get env exp exp)
      (seq? exp) (do (log "SEQ **** env exp" env exp) (eval-list env exp))
+     (map? exp) (do (log "MAP **** env exp" env exp) 
+                    (into (empty exp) (map 
+                                       (fn [[k v]] 
+                                         (do (log "mapping [k v] -> " k v)
+                                         [(my-eval env k) 
+                                          (my-eval env v)])) exp)))
      (coll? exp) (do (log "COLL **** env exp" env exp) (into (empty exp) (map #(my-eval env %) exp)))
      :else exp))))
 

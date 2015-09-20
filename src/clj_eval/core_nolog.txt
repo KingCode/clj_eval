@@ -1,6 +1,5 @@
-(ns clj-eval.core
-  (:require [clj-eval.util :refer [log] :as u]))
-
+;; paste my-eval fn into the code input form at:
+;; 
 (defn my-eval [env exp]
     (letfn [(eval-list [env [op & args :as exp]]
                 (if (= 'let op)
@@ -30,5 +29,6 @@
   (cond 
      (symbol? exp) (get env exp exp)
      (seq? exp) (eval-list env exp)
+     (map? exp) (into (empty exp) (map (fn [[k v]] [(my-eval env k),(my-eval env v)])) exp)))
      (coll? exp) (into (empty exp) (map #(my-eval env %) exp))
      :else exp)))

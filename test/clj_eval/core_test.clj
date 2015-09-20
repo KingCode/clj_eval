@@ -116,3 +116,27 @@
   (testing "nested ifs and let with yield correct value"
     (is (= 1 (my-eval {'x 1} '(let [y 2 z (if (zero? x) 1 0)] z))))
     (is (= 0 (my-eval {'x 1 'zero? zero?} '(let [y 2 z (if (zero? x) 1 0)] z) ))))) 
+
+
+(deftest seq-coll-test
+  (testing "flat and nested seqs with no bindings should be eval'ed"
+    (is (= '(1 2 3) (my-eval {} '(1 2 3))))
+    (is (= '(1 [2 3] 4) (my-eval {} '(1 [2 3] 4))))))
+
+(deftest seq-coll-bindings-test
+  (testing "flat and nested seqs with bindings should be eval'ed"
+    (is (= '(1 2 3) (my-eval {'x 1 'y 2} '(x y 3))))
+    (is (= '[1 [2 3] 4] (my-eval {'x 1 'y 2} '[x [y 3] 4])))
+    (is (= '[1 (2 3) 4] (my-eval {'x 1 'y 2} '[x (y 3) 4])))
+    (is (= '[1 (2 3) 4] (my-eval {'x 1} '[x ((let [y 2] y) 3) 4])))))
+
+
+(deftest map-coll-test
+  (testing "flat and nested maps with no bindings should be eval'ed"
+    (is (= {:a 1 :b 2} (my-eval {} '{:a 1 :b 2})))
+    (is (= {:a {:b 2} :c #{3}}))))
+
+(deftest map-coll-bindings-test
+  (testing "flat and nested maps with bindings should be eval'ed"
+    (is (= {:a 1 :b 2} (my-eval {'x 1 'y 2} '{:a x :b y})))
+    (is (= {:a 1 :b 2 :c 3} (my-eval {'x 1 'y 2 '+ +} '{:a x :b y (let [z :c] z) (+ x y)})))))
