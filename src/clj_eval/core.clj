@@ -28,11 +28,7 @@
                            res
                             (->>(partition 2 letbind) 
                                 (reduce (fn [env [k v]] 
-                                           (assoc env k (my-eval env v))) env)
-                                #_(map (fn [[bk bexp]]
-                                        [bk (my-eval env bexp)]))
-                                #_(apply concat) 
-                                #_vec) 
+                                           (assoc env k (my-eval env v))) env))
                                 _ (log "LETRESOLVE-res:" res)] res)) ]
   (cond 
      (symbol? exp) (get env exp exp)
