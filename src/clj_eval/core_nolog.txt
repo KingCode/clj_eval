@@ -17,18 +17,15 @@
 
             (eval-let [env [_ bindings & body]]
               (->> (apply list 'do body)
-                   (my-eval (apply assoc env 
-                                   (let-resolve env bindings)))))
+                   (my-eval (letbind>env bindings env))))
               
-            (let-resolve [env lbexps]
-                            (->> (partition 2 lbexps) 
-                                (map (fn [[bk bexp]]
-                                        [bk (my-eval env bexp)]))
-                                (apply concat) 
-                                vec)) ] 
+            (letbind>env [letbind env]
+                (->>(partition 2 letbind) 
+                (reduce (fn [env [k v]] 
+                            (assoc env k (my-eval env v))) env))) ] 
   (cond 
      (symbol? exp) (get env exp exp)
      (seq? exp) (eval-list env exp)
-     (map? exp) (into (empty exp) (map (fn [[k v]] [(my-eval env k),(my-eval env v)])) exp)))
+     (map? exp) (into (empty exp) (map (fn [[k v]] [(my-eval env k),(my-eval env v)])) exp)
      (coll? exp) (into (empty exp) (map #(my-eval env %) exp))
      :else exp)))

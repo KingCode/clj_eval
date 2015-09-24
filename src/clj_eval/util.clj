@@ -2,5 +2,8 @@
 
 (def debug nil)
 
-(defn log [& s]
+#_(defn log [& s]
   (when debug (apply println s)))
+
+(defmacro log [& s]
+  (when debug `(println ~@s)))

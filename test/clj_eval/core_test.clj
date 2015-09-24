@@ -140,3 +140,9 @@
   (testing "flat and nested maps with bindings should be eval'ed"
     (is (= {:a 1 :b 2} (my-eval {'x 1 'y 2} '{:a x :b y})))
     (is (= {:a 1 :b 2 :c 3} (my-eval {'x 1 'y 2 '+ +} '{:a x :b y (let [z :c] z) (+ x y)})))))
+
+(deftest let-newbindings-within-test
+  (testing "previous bindings local to current let should be merged 
+in enclosing scope bindings and take priority"
+    (is (= 3 (my-eval {} '(let [x 3 y x] y))))
+    (is (= 5 (my-eval {'x 1 '+ +} '(let [x 2 y (+ x 1)] (+ y x)))))))
